@@ -107,6 +107,11 @@ return [
         ),
     ],
 
+    'discord_webhook_id' => env('DISCORD_WEBHOOK_ID'),
+
+    'discord_webhook_token' => env('DISCORD_WEBHOOK_TOKEN'),
+
+
     /*
     |--------------------------------------------------------------------------
     | Maintenance Mode Driver

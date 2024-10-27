@@ -22,8 +22,8 @@ class DiscordHelper
     public function __construct()
     {
         // $this->webhook_avatar = DiscordConstant::;
-        $this->webhook_id = DiscordConstant::WEBHOOK_ID;
-        $this->webhook_token = DiscordConstant::WEBHOOK_TOKEN;
+        $this->webhook_id = config('app.discord_webhook_id');
+        $this->webhook_token = config('app.discord_webhook_token');
     }
 
     public function debugError(Throwable $throwable = null, $customMessage = null, $lokasi = null)

@@ -8,6 +8,7 @@ use App\Dto\Global\HelperResponseDto;
 use App\Dto\Movie\StoreDto;
 use App\Http\Resources\MovieResources;
 use App\Models\Movies;
+use App\Models\Tmdb;
 use App\Models\TMovieGenres;
 use App\Traits\GlobalTrait;
 use Carbon\Carbon;
@@ -271,7 +272,18 @@ class MovieHelper
         try {
             $client = new Client();
 
-            $response = $client->request('GET', $this->url . '&api_key=' . $this->api_key);
+            $tmdb = Tmdb::find(1);
+
+            if (empty($tmdb)) {
+                $tmdb = Tmdb::create([
+                    'id' => 1,
+                    'page' => 1,
+                    'total_page' => 1,
+                    'repeat' => 0,
+                ]);
+            }
+
+            $response = $client->request('GET', $this->url . '&api_key=' . $this->api_key . '&page=' . $tmdb->page);
 
             if ($response->getStatusCode() >= 400) {
                 throw new Exception($response->getBody());
@@ -279,11 +291,23 @@ class MovieHelper
 
             $data = json_decode($response->getBody(), true);
 
+
             $database = $this->insertFilm($data['results']);
 
             if (!$database->status) {
                 throw new Exception($database->message);
             }
+
+            $tmdb->last_page = $data['total_pages'];
+            if ($tmdb->last_page == $tmdb->page) {
+                $tmdb->page = 1;
+                $tmdb->repeat += 1;
+            } else {
+                $tmdb->page = $tmdb->page + 1;
+            }
+
+            $tmdb->save();
+
 
             return new HelperResponseDto(
                 code: StatusCodeConstant::SUCCESS,
